@@ -14,29 +14,89 @@ This code runs on a separate NodeMCU (or similar) and provides :
 
 *******************************************************/
 
+/********** #Includes **********/
+#include <SoftwareSerial\SoftwareSerial.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
-// Define User Types below here or use a .h file
-//
+/********** Pin Assignments **********/
+//Outputs
+constexpr auto CLOSING_LED_PIN = 99;
+constexpr auto OPENING_LED_PIN = 99;
+constexpr auto SERIAL_RX = 99;
+constexpr auto SERIAL_TX = 99;
+
+//Inputs
 
 
-// Define Function Prototypes that use User Types below here or use a .h file
-//
+/********** Constants **********/
+const unsigned short gateClosedReading = 7000;
+const unsigned short gateOpenReading = 1500;
 
 
-// Define Functions below here or use other .ino or cpp files
-//
+/********** Forward Declarations **********/
+char* concat(const char *s1, const char *s2);
+SoftwareSerial slidingGateDistanceSensorSerial;
 
+
+/********** Main Program Start **********/
 // The setup() function runs once each time the micro-controller starts
 void setup()
 {
-
+	SoftwareSerial slidingGateDistanceSensorSerial(SERIAL_RX, SERIAL_TX, true); //sig from sensor is inverted
+	pinMode(CLOSING_LED_PIN, OUTPUT);
+	pinMode(OPENING_LED_PIN, OUTPUT);
 
 }
 
 // Add the main program code into the continuous loop() function
 void loop()
 {
+	char *posStringRaw;
+	char *posStringFormatted;
+	int gatePosition = gateClosedReading;
+
+	//************ open gate **************
+	do
+	{
+		//print position to serial port
+		itoa(gatePosition, posStringRaw, 10);
+		posStringFormatted = concat("R", posStringRaw);
+		slidingGateDistanceSensorSerial.write(posStringFormatted);
+		free(posStringFormatted);
+		--gatePosition; //gate opening
+
+		//turn on isOpening LED
+		digitalWrite(OPENING_LED_PIN, HIGH);
+		digitalWrite(CLOSING_LED_PIN, LOW);
+		yield();
+	} while (gatePosition > gateOpenReading);
+
+	//************ close gate **************
+	do
+	{
+		//print position to serial port
+		itoa(gatePosition, posStringRaw, 10);
+		posStringFormatted = concat("R", posStringRaw);
+		slidingGateDistanceSensorSerial.write(posStringFormatted);
+		free(posStringFormatted);
+		++gatePosition; //gate closing
+
+		//turn on isClosing LED
+		digitalWrite(OPENING_LED_PIN, LOW);
+		digitalWrite(CLOSING_LED_PIN, HIGH);
+		yield();
+	} while (gatePosition < gateClosedReading);
+}
 
 
+char* concat(const char *s1, const char *s2)
+{
+	char *result = (char *)malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+	// in real code you would check for errors in malloc here
+	strcpy(result, s1);
+	strcat(result, s2);
+	return result;
 }

@@ -41,7 +41,7 @@ char* concat(const char *s1, const char *s2);
 SoftwareSerial slidingGateDistanceSensorSerial;
 
 
-/********** Main Program Start **********/
+/********** Main Program Code  **********/
 // The setup() function runs once each time the micro-controller starts
 void setup()
 {

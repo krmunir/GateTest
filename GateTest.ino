@@ -15,10 +15,10 @@ This code runs on a separate NodeMCU (or similar) and provides :
 *******************************************************/
 
 /********** #Includes **********/
-#include <SoftwareSerial\SoftwareSerial.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SoftwareSerial.h>
 
 
 /********** Pin Assignments **********/
@@ -38,14 +38,13 @@ const unsigned short gateOpenReading = 1500;
 
 /********** Forward Declarations **********/
 char* concat(const char *s1, const char *s2);
-SoftwareSerial slidingGateDistanceSensorSerial;
+SoftwareSerial slidingGateDistanceSensorSerial(SERIAL_RX, SERIAL_TX, true); //sig from sensor is inverted
 
 
 /********** Main Program Code  **********/
 // The setup() function runs once each time the micro-controller starts
 void setup()
 {
-	SoftwareSerial slidingGateDistanceSensorSerial(SERIAL_RX, SERIAL_TX, true); //sig from sensor is inverted
 	pinMode(CLOSING_LED_PIN, OUTPUT);
 	pinMode(OPENING_LED_PIN, OUTPUT);
 
